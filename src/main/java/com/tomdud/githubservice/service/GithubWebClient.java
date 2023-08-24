@@ -3,7 +3,9 @@ package com.tomdud.githubservice.service;
 import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseDTO;
 import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseDTO;
 import com.tomdud.githubservice.exception.GithubUserNotFoundException;
-import lombok.extern.slf4j.Slf4j;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -13,10 +15,11 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpStatusCode;
 
 @Service
-@Slf4j
+
 public class GithubWebClient {
 
     private final WebClient webClient;
+    private final Logger log = LoggerFactory.getLogger(GithubWebClient.class);
 
     public GithubWebClient (
             WebClient.Builder webClientBuilder,
@@ -32,11 +35,14 @@ public class GithubWebClient {
     Flux<GithubApiRepositoriesResponseDTO> getUserRepositories(String username) {
         String usersResourceUri = String.format("/users/%s/repos", username);
 
+        log.info("GithubWebClient::getUserRepositories for username {} - send request to GitHub API {}", username, usersResourceUri);
+
         return webClient.get()
                 .uri(usersResourceUri)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> {
+                    log.error("GithubWebClient::getUserRepositories Username with name {} not found on GitHub", username);
                     return Mono.error(new GithubUserNotFoundException(String.format("Username with name %s not found on GitHub", username)));
                 })
                 .bodyToFlux(GithubApiRepositoriesResponseDTO.class);
@@ -45,10 +51,22 @@ public class GithubWebClient {
     Flux<GithubApiBranchResponseDTO> getInformationAboutBranchesInRepository(String username, String repositoryName) {
         String reposResourceUri = String.format("/repos/%s/%s/branches", username, repositoryName);
 
+        log.info(
+                "GithubWebClient::getInformationAboutBranchesInRepository for username {} and repository {} - send request to GitHub API {}",
+                username, repositoryName, reposResourceUri
+        );
+
         return webClient.get()
                 .uri(reposResourceUri)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> {
+                    log.error(
+                            "GithubWebClient::getInformationAboutBranchesInRepository Username with name {} or repository with name {} not found on GitHub",
+                            username, repositoryName
+                    );
+                    return Mono.error(new GithubUserNotFoundException(String.format("Username with name %s not found on GitHub", username)));
+                })
                 .bodyToFlux(GithubApiBranchResponseDTO.class);
     }
 

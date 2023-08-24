@@ -69,9 +69,9 @@ class GithubWebClientTest {
 
         //then
         StepVerifier.create(githubApiRepositoriesResponseDTOFlux)
-                    .expectNextMatches(repository -> repository.name().equals(mockRepositoriesDTOList.get(0).name()))
-                    .expectNextMatches(repository -> repository.name().equals(mockRepositoriesDTOList.get(1).name()))
-                    .expectNextMatches(repository -> repository.name().equals(mockRepositoriesDTOList.get(2).name()))
+                    .expectNextMatches(repository -> repository.equals(mockRepositoriesDTOList.get(0)))
+                    .expectNextMatches(repository -> repository.equals(mockRepositoriesDTOList.get(1)))
+                    .expectNextMatches(repository -> repository.equals(mockRepositoriesDTOList.get(2)))
                     .verifyComplete();
     }
 
@@ -104,15 +104,30 @@ class GithubWebClientTest {
                 .addHeader("Content-Type", "application/json")
                 .setResponseCode(200)
         );
-        Flux<GithubApiRepositoriesResponseDTO> githubApiRepositoriesResponseDTOFlux =
-                githubWebClient.getUserRepositories("test-username");
+        Flux<GithubApiBranchResponseDTO> githubApiRepositoriesResponseDTOFlux =
+                githubWebClient.getInformationAboutBranchesInRepository("test-username", "test-repository-name");
 
         //then
         StepVerifier.create(githubApiRepositoriesResponseDTOFlux)
-                .expectNextMatches(repository -> repository.name().equals(mockBranchesDTOList.get(0).name()))
-                .expectNextMatches(repository -> repository.name().equals(mockBranchesDTOList.get(1).name()))
-                .expectNextMatches(repository -> repository.name().equals(mockBranchesDTOList.get(2).name()))
+                .expectNextMatches(repository -> repository.equals(mockBranchesDTOList.get(0)))
+                .expectNextMatches(repository -> repository.equals(mockBranchesDTOList.get(1)))
+                .expectNextMatches(repository -> repository.equals(mockBranchesDTOList.get(2)))
                 .verifyComplete();
+    }
+
+    @Test
+    void testGetInformationAboutBranchesInRepositorySuccessBecauseOfNotExistingUserOrRepository() throws JsonProcessingException {
+        //when
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(404)
+        );
+        Flux<GithubApiBranchResponseDTO> githubApiRepositoriesResponseDTOFlux =
+                githubWebClient.getInformationAboutBranchesInRepository("test-username", "test-repository-name");
+
+        //then
+        StepVerifier.create(githubApiRepositoriesResponseDTOFlux)
+                .expectError(GithubUserNotFoundException.class)
+                .verify();
     }
 
 
