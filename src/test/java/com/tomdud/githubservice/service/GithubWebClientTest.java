@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
@@ -41,7 +42,10 @@ class GithubWebClientTest {
 
     @BeforeEach
     void initialize() {
-        String baseUrl = String.format("https://api.github.com");
+        githubWebClient = new GithubWebClient(
+                WebClient.builder(),
+                mockBackEnd.url("/").toString(),
+                "test-version");
     }
 
     @Test
@@ -55,13 +59,14 @@ class GithubWebClientTest {
         //when
         mockBackEnd.enqueue(new MockResponse()
                 .setBody(objectMapper.writeValueAsString(mockRepositoriesDTOList))
-                .addHeader("Content-Type", "application/json"));
+                .addHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+        );
         Flux<GithubApiRepositoriesResponseDTO> githubApiRepositoriesResponseDTOFlux =
                 githubWebClient.getUserRepositories("tomdud-developer");
 
         //then
         StepVerifier.create(githubApiRepositoriesResponseDTOFlux)
-                    .expectNextCount(3)
                     .expectNextMatches(repository -> repository.name().equals(mockRepositoriesDTOList.get(0).name()))
                     .expectNextMatches(repository -> repository.name().equals(mockRepositoriesDTOList.get(1).name()))
                     .expectNextMatches(repository -> repository.name().equals(mockRepositoriesDTOList.get(2).name()))
