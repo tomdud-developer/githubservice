@@ -2,14 +2,18 @@ package com.tomdud.githubservice.service;
 
 import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseDTO;
 import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseDTO;
+import com.tomdud.githubservice.exception.GithubUserNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import org.springframework.http.HttpStatusCode;
 
 @Service
+@Slf4j
 public class GithubWebClient {
 
     private final WebClient webClient;
@@ -32,6 +36,9 @@ public class GithubWebClient {
                 .uri(usersResourceUri)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> {
+                    return Mono.error(new GithubUserNotFoundException(String.format("Username with name %s not found on GitHub", username)));
+                })
                 .bodyToFlux(GithubApiRepositoriesResponseDTO.class);
     }
 

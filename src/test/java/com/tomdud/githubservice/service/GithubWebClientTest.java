@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseDTO;
 import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseDTO;
+import com.tomdud.githubservice.exception.GithubUserNotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -50,7 +51,7 @@ class GithubWebClientTest {
     }
 
     @Test
-    void getUserRepositories() throws JsonProcessingException {
+    void testGetUserRepositoriesSuccess() throws JsonProcessingException {
         //given
         List<GithubApiRepositoriesResponseDTO> mockRepositoriesDTOList = new ArrayList<>();
         mockRepositoriesDTOList.add(new GithubApiRepositoriesResponseDTO("test-RepoName1", false));
@@ -75,7 +76,22 @@ class GithubWebClientTest {
     }
 
     @Test
-    void getInformationAboutBranchesInRepositoryShouldSuccess() throws JsonProcessingException {
+    void testGetUserRepositoriesFailedBecauseOfNotExistingUser() {
+        //when
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(404)
+        );
+        Flux<GithubApiRepositoriesResponseDTO> githubApiRepositoriesResponseDTOFlux =
+                githubWebClient.getUserRepositories("test-username");
+
+        //then
+        StepVerifier.create(githubApiRepositoriesResponseDTOFlux)
+                .expectError(GithubUserNotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void testGetInformationAboutBranchesInRepositorySuccess() throws JsonProcessingException {
         //given
         List<GithubApiBranchResponseDTO> mockBranchesDTOList = new ArrayList<>();
         mockBranchesDTOList.add(new GithubApiBranchResponseDTO("test-BranchName1", "313aeac31f14bb4542c035438fcc1f9753bb7e08"));
