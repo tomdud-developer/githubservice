@@ -10,18 +10,16 @@ import reactor.core.publisher.Flux;
 @Service
 public class GithubWebClient {
 
-    @Value("webclient.api.github.url")
-    private String URL;
-
-    @Value("webclient.api.github.version")
-    private String VERSION;
-
     private final WebClient webClient;
 
-    public GithubWebClient() {
-        webClient = WebClient.builder()
-                .baseUrl(URL)
-                .defaultHeader("X-GitHub-Api-Version", VERSION)
+    public GithubWebClient (
+            WebClient.Builder webClientBuilder,
+            @Value("${webclient.api.github.url}") String url,
+            @Value("${webclient.api.github.version}") String version
+    ) {
+        this.webClient = webClientBuilder
+                .baseUrl(url)
+                .defaultHeader("X-GitHub-Api-Version", version)
                 .build();
     }
 
