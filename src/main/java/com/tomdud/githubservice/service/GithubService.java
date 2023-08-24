@@ -1,8 +1,8 @@
 package com.tomdud.githubservice.service;
 
 import com.tomdud.githubservice.dto.GithubRepositoryResponseDTO;
-import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseDTO;
-import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseDTO;
+import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseRecord;
+import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class GithubService {
-
 
     private final GithubWebClient githubWebClient;
 
@@ -22,10 +21,10 @@ public class GithubService {
 
     public Flux<GithubRepositoryResponseDTO> getUserNotForkedRepositoriesInformation (String username) {
 
-        Flux<GithubApiRepositoriesResponseDTO> repositoriesFlux = githubWebClient.getUserRepositories(username);
+        Flux<GithubApiRepositoriesResponseRecord> repositoriesFlux = githubWebClient.getUserRepositories(username);
         return repositoriesFlux.flatMapSequential(
                 repository -> {
-                    Flux<GithubApiBranchResponseDTO> githubApiBranchResponseDTOFlux =
+                    Flux<GithubApiBranchResponseRecord> githubApiBranchResponseDTOFlux =
                             getInformationAboutBranchesInRepository(username, repository.name());
 
                     return githubApiBranchResponseDTOFlux.collectList().map(
@@ -37,7 +36,7 @@ public class GithubService {
                                                         GithubRepositoryResponseDTO.Branch
                                                                 .builder()
                                                                 .name(branch.name())
-                                                                .sha(branch.sha())
+                                                                .sha(branch.commit().sha())
                                                                 .build()
                                             ).collect(Collectors.toList())
                                     ).build()
@@ -46,7 +45,7 @@ public class GithubService {
         );
     }
 
-    private Flux<GithubApiBranchResponseDTO> getInformationAboutBranchesInRepository(String username, String repositoryName) {
+    private Flux<GithubApiBranchResponseRecord> getInformationAboutBranchesInRepository(String username, String repositoryName) {
         return githubWebClient.getInformationAboutBranchesInRepository(
                     username,
                     repositoryName

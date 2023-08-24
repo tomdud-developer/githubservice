@@ -1,7 +1,7 @@
 package com.tomdud.githubservice.service;
 
-import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseDTO;
-import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseDTO;
+import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseRecord;
+import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseRecord;
 import com.tomdud.githubservice.exception.GithubUserNotFoundException;
 
 import org.slf4j.Logger;
@@ -32,7 +32,7 @@ public class GithubWebClient {
                 .build();
     }
 
-    Flux<GithubApiRepositoriesResponseDTO> getUserRepositories(String username) {
+    Flux<GithubApiRepositoriesResponseRecord> getUserRepositories(String username) {
         String usersResourceUri = String.format("/users/%s/repos", username);
 
         log.info("GithubWebClient::getUserRepositories for username {} - send request to GitHub API {}", username, usersResourceUri);
@@ -45,10 +45,10 @@ public class GithubWebClient {
                     log.error("GithubWebClient::getUserRepositories Username with name {} not found on GitHub", username);
                     return Mono.error(new GithubUserNotFoundException(String.format("Username with name %s not found on GitHub", username)));
                 })
-                .bodyToFlux(GithubApiRepositoriesResponseDTO.class);
+                .bodyToFlux(GithubApiRepositoriesResponseRecord.class);
     }
 
-    Flux<GithubApiBranchResponseDTO> getInformationAboutBranchesInRepository(String username, String repositoryName) {
+    Flux<GithubApiBranchResponseRecord> getInformationAboutBranchesInRepository(String username, String repositoryName) {
         String reposResourceUri = String.format("/repos/%s/%s/branches", username, repositoryName);
 
         log.info(
@@ -67,7 +67,7 @@ public class GithubWebClient {
                     );
                     return Mono.error(new GithubUserNotFoundException(String.format("Username with name %s not found on GitHub", username)));
                 })
-                .bodyToFlux(GithubApiBranchResponseDTO.class);
+                .bodyToFlux(GithubApiBranchResponseRecord.class);
     }
 
 }

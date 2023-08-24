@@ -2,8 +2,8 @@ package com.tomdud.githubservice.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseDTO;
-import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseDTO;
+import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseRecord;
+import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseRecord;
 import com.tomdud.githubservice.exception.GithubUserNotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -53,10 +53,10 @@ class GithubWebClientTest {
     @Test
     void testGetUserRepositoriesSuccess() throws JsonProcessingException {
         //given
-        List<GithubApiRepositoriesResponseDTO> mockRepositoriesDTOList = new ArrayList<>();
-        mockRepositoriesDTOList.add(new GithubApiRepositoriesResponseDTO("test-RepoName1", false));
-        mockRepositoriesDTOList.add(new GithubApiRepositoriesResponseDTO("test-RepoName2", true));
-        mockRepositoriesDTOList.add(new GithubApiRepositoriesResponseDTO("test-RepoName3", false));
+        List<GithubApiRepositoriesResponseRecord> mockRepositoriesDTOList = new ArrayList<>();
+        mockRepositoriesDTOList.add(new GithubApiRepositoriesResponseRecord("test-RepoName1", false));
+        mockRepositoriesDTOList.add(new GithubApiRepositoriesResponseRecord("test-RepoName2", true));
+        mockRepositoriesDTOList.add(new GithubApiRepositoriesResponseRecord("test-RepoName3", false));
 
         //when
         mockBackEnd.enqueue(new MockResponse()
@@ -64,7 +64,7 @@ class GithubWebClientTest {
                 .addHeader("Content-Type", "application/json")
                 .setResponseCode(200)
         );
-        Flux<GithubApiRepositoriesResponseDTO> githubApiRepositoriesResponseDTOFlux =
+        Flux<GithubApiRepositoriesResponseRecord> githubApiRepositoriesResponseDTOFlux =
                 githubWebClient.getUserRepositories("test-username");
 
         //then
@@ -81,7 +81,7 @@ class GithubWebClientTest {
         mockBackEnd.enqueue(new MockResponse()
                 .setResponseCode(404)
         );
-        Flux<GithubApiRepositoriesResponseDTO> githubApiRepositoriesResponseDTOFlux =
+        Flux<GithubApiRepositoriesResponseRecord> githubApiRepositoriesResponseDTOFlux =
                 githubWebClient.getUserRepositories("test-username");
 
         //then
@@ -93,10 +93,13 @@ class GithubWebClientTest {
     @Test
     void testGetInformationAboutBranchesInRepositorySuccess() throws JsonProcessingException {
         //given
-        List<GithubApiBranchResponseDTO> mockBranchesDTOList = new ArrayList<>();
-        mockBranchesDTOList.add(new GithubApiBranchResponseDTO("test-BranchName1", "313aeac31f14bb4542c035438fcc1f9753bb7e08"));
-        mockBranchesDTOList.add(new GithubApiBranchResponseDTO("test-BranchName2", "04b24aaf72602f7cc978de48c797967501c8444f"));
-        mockBranchesDTOList.add(new GithubApiBranchResponseDTO("test-BranchName3", "30e707192cb80485853f7024756d6b7e4eb02069"));
+        List<GithubApiBranchResponseRecord> mockBranchesDTOList = new ArrayList<>();
+        mockBranchesDTOList.add(new GithubApiBranchResponseRecord("test-BranchName1",
+                new GithubApiBranchResponseRecord.Commit("313aeac31f14bb4542c035438fcc1f9753bb7e08")));
+        mockBranchesDTOList.add(new GithubApiBranchResponseRecord("test-BranchName2",
+                new GithubApiBranchResponseRecord.Commit("04b24aaf72602f7cc978de48c797967501c8444f")));
+        mockBranchesDTOList.add(new GithubApiBranchResponseRecord("test-BranchName3",
+                new GithubApiBranchResponseRecord.Commit("30e707192cb80485853f7024756d6b7e4eb02069")));
 
         //when
         mockBackEnd.enqueue(new MockResponse()
@@ -104,7 +107,7 @@ class GithubWebClientTest {
                 .addHeader("Content-Type", "application/json")
                 .setResponseCode(200)
         );
-        Flux<GithubApiBranchResponseDTO> githubApiRepositoriesResponseDTOFlux =
+        Flux<GithubApiBranchResponseRecord> githubApiRepositoriesResponseDTOFlux =
                 githubWebClient.getInformationAboutBranchesInRepository("test-username", "test-repository-name");
 
         //then
@@ -121,7 +124,7 @@ class GithubWebClientTest {
         mockBackEnd.enqueue(new MockResponse()
                 .setResponseCode(404)
         );
-        Flux<GithubApiBranchResponseDTO> githubApiRepositoriesResponseDTOFlux =
+        Flux<GithubApiBranchResponseRecord> githubApiRepositoriesResponseDTOFlux =
                 githubWebClient.getInformationAboutBranchesInRepository("test-username", "test-repository-name");
 
         //then
