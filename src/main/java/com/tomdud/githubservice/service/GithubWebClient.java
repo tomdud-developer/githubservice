@@ -2,12 +2,9 @@ package com.tomdud.githubservice.service;
 
 import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClient.UriSpec;
-import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec;
 import reactor.core.publisher.Flux;
 
 @Service
