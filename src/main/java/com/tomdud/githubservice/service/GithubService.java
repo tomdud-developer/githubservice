@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import java.util.stream.Collectors;
+
 @Service
 public class GithubService {
 
@@ -21,17 +23,27 @@ public class GithubService {
     public Flux<GithubRepositoryResponseDTO> getUserNotForkedRepositoriesInformation (String username) {
 
         Flux<GithubApiRepositoriesResponseDTO> repositoriesFlux = githubWebClient.getUserRepositories(username);
-        repositoriesFlux.flatMapSequential(
+        return repositoriesFlux.flatMapSequential(
                 repository -> {
-                    getInformationAboutBranchesInRepository(username, repository.name());
-                    return GithubRepositoryResponseDTO.builder()
-                            .name(repository.name())
-                            .ownerLogin(username)
-                            .branches()
-                            .build();
-                }
-        )
+                    Flux<GithubApiBranchResponseDTO> githubApiBranchResponseDTOFlux =
+                            getInformationAboutBranchesInRepository(username, repository.name());
 
+                    return githubApiBranchResponseDTOFlux.collectList().map(
+                            branches -> GithubRepositoryResponseDTO.builder()
+                                    .name(repository.name())
+                                    .ownerLogin(username)
+                                    .branches(
+                                            branches.stream().map(branch ->
+                                                        GithubRepositoryResponseDTO.Branch
+                                                                .builder()
+                                                                .name(branch.name())
+                                                                .sha(branch.sha())
+                                                                .build()
+                                            ).collect(Collectors.toList())
+                                    ).build()
+                    );
+                }
+        );
     }
 
     private Flux<GithubApiBranchResponseDTO> getInformationAboutBranchesInRepository(String username, String repositoryName) {
