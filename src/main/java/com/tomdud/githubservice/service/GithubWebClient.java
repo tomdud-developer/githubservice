@@ -1,11 +1,13 @@
 package com.tomdud.githubservice.service;
 
 import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseDTO;
+import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 public class GithubWebClient {
@@ -31,6 +33,16 @@ public class GithubWebClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToFlux(GithubApiRepositoriesResponseDTO.class);
+    }
+
+    Flux<GithubApiBranchResponseDTO> getInformationAboutBranchesInRepository(String username, String repositoryName) {
+        String reposResourceUri = String.format("/repos/%s/%s/branches", username, repositoryName);
+
+        return webClient.get()
+                .uri(reposResourceUri)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(GithubApiBranchResponseDTO.class);
     }
 
 }

@@ -1,8 +1,8 @@
 package com.tomdud.githubservice.dto.githubapi;
 
-public record GithubApiRepositoriesResponseDTO(
+public record GithubApiBranchResponseDTO(
         String name,
-        boolean fork
+        String sha
 ) {
 
 }
