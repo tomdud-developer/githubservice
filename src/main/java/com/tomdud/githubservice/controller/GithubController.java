@@ -3,6 +3,8 @@ package com.tomdud.githubservice.controller;
 import com.tomdud.githubservice.dto.ApiResponse;
 import com.tomdud.githubservice.dto.RepositoryResponseDTO;
 import com.tomdud.githubservice.service.GithubService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +21,16 @@ import java.util.List;
 @RestController
 @RequestMapping("api/v1/github/repositories")
 @AllArgsConstructor
+@Tag(name = "GitHub controller")
 public class GithubController {
 
     private final Logger log = LoggerFactory.getLogger(GithubController.class);
     private final GithubService githubService;
 
+    @Operation(
+            description = "Retrieve information about user repositories with branch name and last commit SHA, throw 404 if user not found on github",
+            summary = "User repositories"
+    )
     @GetMapping(
             value = "/{username}",
             produces = MediaType.APPLICATION_JSON_VALUE
