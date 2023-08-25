@@ -1,9 +1,7 @@
 package com.tomdud.githubservice.service;
 
-
 import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseRecord;
 import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseRecord;
-import com.tomdud.githubservice.dto.githubapi.GithubErrorMessage;
 import com.tomdud.githubservice.exception.GithubBadRequestException;
 import com.tomdud.githubservice.exception.GithubResourceNotFoundException;
 import com.tomdud.githubservice.exception.UnknownGithubApiException;
@@ -61,23 +59,13 @@ public class GithubWebClient {
                         log.error("GithubWebClient::getUserRepositories Username with name {} not found on GitHub", username);
                         return Mono.error(new GithubUserNotFoundException(String.format("Username with name %s not found on GitHub", username)));
                     } else {
-                        log.error("GithubWebClient::getUserRepositories GithubApi exception, clientResponse: {}", clientErrorResponse);
-                        return clientErrorResponse
-                                .bodyToMono(GithubErrorMessage.class)
-                                .flatMap(errorMessage -> {
-                                    String errorDescription = String.format("GithubBadRequestException, clientResponse: %s", errorMessage.message());
-                                    return Mono.error(new GithubBadRequestException(errorDescription));
-                                });
+                        log.error("GithubWebClient::getUserRepositories GithubBadRequestException, probably reach limit of requests");
+                        return Mono.error(new GithubBadRequestException("GithubBadRequestException, you probably reach limit of requests"));
                     }
                 })
                 .onStatus(HttpStatusCode::isError, clientErrorResponse -> {
-                    log.error("GithubWebClient::getUserRepositories GithubApi exception, clientResponse: {}", clientErrorResponse);
-                    return clientErrorResponse
-                            .bodyToMono(GithubErrorMessage.class)
-                            .flatMap(errorMessage -> {
-                                String errorDescription = String.format("GithubBadRequestException, clientResponse: %s", errorMessage.message());
-                                return Mono.error(new UnknownGithubApiException(String.format("Unknown GithubApi exception, clientResponse: %s", errorDescription)));
-                            });
+                    log.error("GithubWebClient::getUserRepositories GithubApi exception, status code from Github - {}", clientErrorResponse.statusCode().value());
+                    return Mono.error(new UnknownGithubApiException(String.format("Unknown GithubApi exception, status code from Github - %d", clientErrorResponse.statusCode().value())));
                 })
                 .bodyToFlux(GithubApiRepositoriesResponseRecord.class);
     }
@@ -105,23 +93,13 @@ public class GithubWebClient {
                                         String.format("Username %s or repository %s not found on GitHub", username, repositoryName))
                         );
                     } else {
-                        log.error("GithubWebClient::getInformationAboutBranchesInRepository GithubBadRequestException, clientResponse: {}", clientErrorResponse);
-                        return clientErrorResponse
-                                .bodyToMono(GithubErrorMessage.class)
-                                .flatMap(errorMessage -> {
-                                    String errorDescription = String.format("GithubBadRequestException, clientResponse: %s", errorMessage.message());
-                                    return Mono.error(new GithubBadRequestException(errorDescription));
-                                });
+                        log.error("GithubWebClient::getInformationAboutBranchesInRepository GithubBadRequestException, probably reach limit of requests");
+                        return Mono.error(new GithubBadRequestException("GithubBadRequestException, you probably reach limit of requests"));
                     }
                 })
                 .onStatus(HttpStatusCode::isError, clientErrorResponse -> {
-                    log.error("GithubWebClient::getUserRepositories GithubApi exception, clientResponse: {}", clientErrorResponse);
-                    return clientErrorResponse
-                            .bodyToMono(GithubErrorMessage.class)
-                            .flatMap(errorMessage -> {
-                                String errorDescription = String.format("GithubBadRequestException, clientResponse: %s", errorMessage.message());
-                                return Mono.error(new UnknownGithubApiException(String.format("Unknown GithubApi exception, clientResponse: %s", errorDescription)));
-                            });
+                    log.error("GithubWebClient::getInformationAboutBranchesInRepository GithubApi exception, status code from Github - {}", clientErrorResponse.statusCode().value());
+                    return Mono.error(new UnknownGithubApiException(String.format("Unknown GithubApi exception, status code from Github - %d", clientErrorResponse.statusCode().value())));
                 })
                 .bodyToFlux(GithubApiBranchResponseRecord.class);
     }
