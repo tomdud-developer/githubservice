@@ -8,7 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 @Service
@@ -27,36 +29,39 @@ public class GithubService {
 
         Flux<GithubApiRepositoriesResponseRecord> repositoriesFlux = githubWebClient.getUserRepositories(username);
 
-
         return repositoriesFlux
                 .filter(Predicate.not(GithubApiRepositoriesResponseRecord::fork))
-                .flatMapSequential(repository -> {
-                    Flux<GithubApiBranchResponseRecord> githubApiBranchResponseDTOFlux =
-                            getInformationAboutBranchesInRepository(username, repository.name());
-
-                    return githubApiBranchResponseDTOFlux.collectList().map(
-                            branches -> RepositoryResponseDTO.builder()
-                                    .name(repository.name())
-                                    .ownerLogin(username)
-                                    .branches(
-                                            branches.stream().map(branch ->
-                                                        RepositoryResponseDTO.Branch
-                                                                .builder()
-                                                                .name(branch.name())
-                                                                .sha(branch.commit().sha())
-                                                                .build()
-                                            ).toList()
-                                    ).build()
-                    );
-                }
+                .flatMapSequential(repository -> generateRepositoryResponseDTO(repository, username)
         );
     }
 
+    private Mono<RepositoryResponseDTO> generateRepositoryResponseDTO(GithubApiRepositoriesResponseRecord githubApiRepositoriesResponseRecord, String username) {
+        Flux<GithubApiBranchResponseRecord> githubApiBranchResponseDTOFlux =
+                getInformationAboutBranchesInRepository(username, githubApiRepositoriesResponseRecord.name());
+
+        return githubApiBranchResponseDTOFlux.collectList().map(
+                branches -> RepositoryResponseDTO.builder()
+                        .name(githubApiRepositoriesResponseRecord.name())
+                        .ownerLogin(username)
+                        .branches(generateBranchList(branches))
+                        .build()
+        );
+    }
 
     private Flux<GithubApiBranchResponseRecord> getInformationAboutBranchesInRepository(String username, String repositoryName) {
         return githubWebClient.getInformationAboutBranchesInRepository(
-                    username,
-                    repositoryName
+                username,
+                repositoryName
         );
+    }
+
+    private List<RepositoryResponseDTO.Branch> generateBranchList(List<GithubApiBranchResponseRecord> githubApiBranchResponseRecordList) {
+        return githubApiBranchResponseRecordList.stream().map(branch ->
+                RepositoryResponseDTO.Branch
+                        .builder()
+                        .name(branch.name())
+                        .sha(branch.commit().sha())
+                        .build()
+        ).toList();
     }
 }

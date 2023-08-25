@@ -10,17 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
-import java.util.List;
 import java.util.stream.Stream;
-
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
-
 class GithubServiceTest {
 
     @Autowired
@@ -128,9 +122,17 @@ class GithubServiceTest {
                 .verifyComplete();
     }
 
+    @Test
     void testGetUserNotForkedRepositoriesInformationThrowUserNotFoundException() {
         //when
-        when(githubWebClient.getUserRepositories(TEST_USERNAME + "_not_exist")).thenThrow(new GithubUserNotFoundException("User with name"));
+        when(githubWebClient.getUserRepositories(TEST_USERNAME + "_not_exist")).thenReturn(Flux.error(new GithubUserNotFoundException("User not found")));
+
+        Flux<RepositoryResponseDTO> repositoryFlux = githubService.getUserNotForkedRepositoriesInformation(TEST_USERNAME + "_not_exist");
+
+        //then
+        StepVerifier.create(repositoryFlux)
+                .expectError(GithubUserNotFoundException.class)
+                .verify();
     }
 
 

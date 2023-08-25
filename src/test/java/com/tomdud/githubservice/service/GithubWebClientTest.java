@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseRecord;
 import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseRecord;
+import com.tomdud.githubservice.exception.GithubBadRequestException;
 import com.tomdud.githubservice.exception.GithubResourceNotFoundException;
 import com.tomdud.githubservice.exception.GithubUserNotFoundException;
 import com.tomdud.githubservice.exception.UnknownGithubApiException;
@@ -93,6 +94,21 @@ class GithubWebClientTest {
     }
 
     @Test
+    void testGetUserRepositoriesFailedBecauseOfGithubBadRequest() {
+        //when
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(400)
+        );
+        Flux<GithubApiRepositoriesResponseRecord> githubApiRepositoriesResponseDTOFlux =
+                githubWebClient.getUserRepositories("test-username");
+
+        //then
+        StepVerifier.create(githubApiRepositoriesResponseDTOFlux)
+                .expectError(GithubBadRequestException.class)
+                .verify();
+    }
+
+    @Test
     void testGetUserRepositoriesFailedBecauseOfGithubExternalError() {
         //when
         mockBackEnd.enqueue(new MockResponse()
@@ -112,7 +128,7 @@ class GithubWebClientTest {
         //given
         List<GithubApiBranchResponseRecord> mockBranchesDTOList = new ArrayList<>();
         mockBranchesDTOList.add(new GithubApiBranchResponseRecord("test-BranchName1",
-                new GithubApiBranchResponseRecord.Commit("313aeac31f14bb4542c035438fcc1f9753bb7e08")));
+                new GithubApiBranchResponseRecord.Commit("3134fwc31f14bb4542c035438fcc1f9753bb7e08")));
         mockBranchesDTOList.add(new GithubApiBranchResponseRecord("test-BranchName2",
                 new GithubApiBranchResponseRecord.Commit("04b24aaf72602f7cc978de48c797967501c8444f")));
         mockBranchesDTOList.add(new GithubApiBranchResponseRecord("test-BranchName3",
@@ -136,7 +152,7 @@ class GithubWebClientTest {
     }
 
     @Test
-    void testGetInformationAboutBranchesInRepositoryFailedBecauseOfNotExistingUserOrRepository() throws JsonProcessingException {
+    void testGetInformationAboutBranchesInRepositoryFailedBecauseOfNotExistingUserOrRepository() {
         //when
         mockBackEnd.enqueue(new MockResponse()
                 .setResponseCode(404)
@@ -151,7 +167,7 @@ class GithubWebClientTest {
     }
 
     @Test
-    void testGetInformationAboutBranchesInRepositoryFailedBecauseOfGithubServerError() throws JsonProcessingException {
+    void testGetInformationAboutBranchesInRepositoryFailedBecauseOfGithubServerError() {
         //when
         mockBackEnd.enqueue(new MockResponse()
                 .setResponseCode(500)
@@ -162,6 +178,21 @@ class GithubWebClientTest {
         //then
         StepVerifier.create(githubApiRepositoriesResponseDTOFlux)
                 .expectError(UnknownGithubApiException.class)
+                .verify();
+    }
+
+    @Test
+    void testGetInformationAboutBranchesInRepositoryFailedBecauseOfBadRequest() {
+        //when
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(400)
+        );
+        Flux<GithubApiBranchResponseRecord> githubApiRepositoriesResponseDTOFlux =
+                githubWebClient.getInformationAboutBranchesInRepository("test-username", "test-repository-name");
+
+        //then
+        StepVerifier.create(githubApiRepositoriesResponseDTOFlux)
+                .expectError(GithubBadRequestException.class)
                 .verify();
     }
 

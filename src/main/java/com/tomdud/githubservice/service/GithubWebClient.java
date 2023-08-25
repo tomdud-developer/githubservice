@@ -2,6 +2,7 @@ package com.tomdud.githubservice.service;
 
 import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseRecord;
 import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseRecord;
+import com.tomdud.githubservice.exception.GithubBadRequestException;
 import com.tomdud.githubservice.exception.GithubResourceNotFoundException;
 import com.tomdud.githubservice.exception.UnknownGithubApiException;
 import com.tomdud.githubservice.exception.GithubUserNotFoundException;
@@ -49,7 +50,7 @@ public class GithubWebClient {
                         return Mono.error(new GithubUserNotFoundException(String.format("Username with name %s not found on GitHub", username)));
                     } else {
                         log.error("GithubWebClient::getUserRepositories GithubApi exception, clientResponse: {}", clientErrorResponse);
-                        return Mono.error(new UnknownGithubApiException(String.format("Unknown GithubApi exception, clientResponse: %s", clientErrorResponse)));
+                        return Mono.error(new GithubBadRequestException(String.format("GithubBadRequestException, clientResponse: %s", clientErrorResponse)));
                     }
                 })
                 .onStatus(HttpStatusCode::isError, clientErrorResponse -> {
@@ -82,8 +83,8 @@ public class GithubWebClient {
                                         String.format("Username %s or repository %s not found on GitHub", username, repositoryName))
                         );
                     } else {
-                        log.error("GithubWebClient::getInformationAboutBranchesInRepository GithubApi exception, clientResponse: {}", clientErrorResponse);
-                        return Mono.error(new UnknownGithubApiException(String.format("Unknown GithubApi exception, clientResponse: %s", clientErrorResponse)));
+                        log.error("GithubWebClient::getInformationAboutBranchesInRepository GithubBadRequestException, clientResponse: {}", clientErrorResponse);
+                        return Mono.error(new GithubBadRequestException(String.format("GithubBadRequestException, clientResponse: %s", clientErrorResponse)));
                     }
                 })
                 .onStatus(HttpStatusCode::isError, clientErrorResponse -> {
