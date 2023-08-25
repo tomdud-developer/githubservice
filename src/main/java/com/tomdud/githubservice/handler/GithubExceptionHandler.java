@@ -25,7 +25,7 @@ public class GithubExceptionHandler {
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(GithubUserNotFoundException.class)
-    public Mono<ResponseEntity<ApiResponse<String>>> handleGithubUserNotFoundException(GithubUserNotFoundException ex) {
+    public ResponseEntity<ApiResponse<String>> handleGithubUserNotFoundException(GithubUserNotFoundException ex) {
         log.error("ExceptionHandler::handleGithubUserNotFoundException caught: {}", ex.getMessage());
 
         var apiResponse = ApiResponse.<String>builder()
@@ -34,12 +34,12 @@ public class GithubExceptionHandler {
                         List.of(new ErrorDTO("username", ex.getMessage()))
                 ).build();
 
-        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(RuntimeException.class)
-    public Flux<ApiResponse<String>> handleRuntimeException(RuntimeException ex) {
+    public ResponseEntity<ApiResponse<String>> handleRuntimeException(RuntimeException ex) {
         log.error("ExceptionHandler::handleRuntimeException caught: {}" ,ex.getMessage());
 
         var apiResponse = ApiResponse.<String>builder()
@@ -48,7 +48,7 @@ public class GithubExceptionHandler {
                         List.of(new ErrorDTO("unknown", ex.getMessage()))
                 ).build();
 
-        return Flux.just(apiResponse);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
     }
 
 }
