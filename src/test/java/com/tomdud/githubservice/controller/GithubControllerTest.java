@@ -3,6 +3,7 @@ package com.tomdud.githubservice.controller;
 import com.tomdud.githubservice.dto.RepositoryResponseDTO;
 import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseRecord;
 import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseRecord;
+import com.tomdud.githubservice.exception.GithubUserNotFoundException;
 import com.tomdud.githubservice.service.GithubService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -108,6 +109,25 @@ class GithubControllerTest {
                 .jsonPath("$.results[1].branches[0].name").isEqualTo(repositoryResponseDTO2.getBranches().get(0).getName())
                 .jsonPath("$.results[1].branches[0].lastCommitSha").isEqualTo(repositoryResponseDTO2.getBranches().get(0).getLastCommitSha())
         ;
+    }
+
+    @Test
+    void testGetUserNotForkedRepositoriesInformationErrorBecauseUserNotFound() {
+        //when
+        when(githubService.getUserNotForkedRepositoriesInformation(TEST_USERNAME)).thenReturn(Flux.error(new GithubUserNotFoundException("User not found")));
+
+        //then
+        webTestClient
+                .get()
+                .uri(CONTROLLER_BASE_URL + "/" + TEST_USERNAME)
+                .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo("error")
+                .jsonPath("$.errors").isArray()
+                .jsonPath("$.errors[0].field").isEqualTo("username")
+                .jsonPath("$.errors[0].errorMessage").isEqualTo("User not found");
     }
 
 
