@@ -124,7 +124,7 @@ class GithubControllerTest {
                 .exchange()
                 .expectStatus().is4xxClientError()
                 .expectBody()
-                .jsonPath("$.status").isEqualTo("error")
+                .jsonPath("$.results").isEqualTo("error")
                 .jsonPath("$.errors").isArray()
                 .jsonPath("$.errors[0].field").isEqualTo("username")
                 .jsonPath("$.errors[0].errorMessage").isEqualTo("User not found");

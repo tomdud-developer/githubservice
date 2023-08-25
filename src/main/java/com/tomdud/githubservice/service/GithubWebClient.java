@@ -1,12 +1,13 @@
 package com.tomdud.githubservice.service;
 
+
 import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseRecord;
 import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseRecord;
+import com.tomdud.githubservice.dto.githubapi.GithubErrorMessage;
 import com.tomdud.githubservice.exception.GithubBadRequestException;
 import com.tomdud.githubservice.exception.GithubResourceNotFoundException;
 import com.tomdud.githubservice.exception.UnknownGithubApiException;
 import com.tomdud.githubservice.exception.GithubUserNotFoundException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,12 +32,14 @@ public class GithubWebClient {
             @Value("personal-github-token") String personalGithubToken
     ) {
         if (personalGithubToken != null) {
+            log.info("GithubWebClient::constructor running with token mode");
             this.webClient = webClientBuilder
                     .baseUrl(url)
                     .defaultHeader("Authorization", personalGithubToken)
                     .defaultHeader("X-GitHub-Api-Version", version)
                     .build();
         } else {
+            log.info("GithubWebClient::constructor running without token mode");
             this.webClient = webClientBuilder
                     .baseUrl(url)
                     .defaultHeader("X-GitHub-Api-Version", version)
@@ -59,12 +62,22 @@ public class GithubWebClient {
                         return Mono.error(new GithubUserNotFoundException(String.format("Username with name %s not found on GitHub", username)));
                     } else {
                         log.error("GithubWebClient::getUserRepositories GithubApi exception, clientResponse: {}", clientErrorResponse);
-                        return Mono.error(new GithubBadRequestException(String.format("GithubBadRequestException, clientResponse: %s", clientErrorResponse.bodyToMono(String.class))));
+                        return clientErrorResponse
+                                .bodyToMono(GithubErrorMessage.class)
+                                .flatMap(errorMessage -> {
+                                    String errorDescription = String.format("GithubBadRequestException, clientResponse: %s", errorMessage.message());
+                                    return Mono.error(new GithubBadRequestException(errorDescription));
+                                });
                     }
                 })
                 .onStatus(HttpStatusCode::isError, clientErrorResponse -> {
                     log.error("GithubWebClient::getUserRepositories GithubApi exception, clientResponse: {}", clientErrorResponse);
-                    return Mono.error(new UnknownGithubApiException(String.format("Unknown GithubApi exception, clientResponse: %s", clientErrorResponse)));
+                    return clientErrorResponse
+                            .bodyToMono(GithubErrorMessage.class)
+                            .flatMap(errorMessage -> {
+                                String errorDescription = String.format("GithubBadRequestException, clientResponse: %s", errorMessage.message());
+                                return Mono.error(new UnknownGithubApiException(String.format("Unknown GithubApi exception, clientResponse: %s", errorDescription)));
+                            });
                 })
                 .bodyToFlux(GithubApiRepositoriesResponseRecord.class);
     }
@@ -93,12 +106,22 @@ public class GithubWebClient {
                         );
                     } else {
                         log.error("GithubWebClient::getInformationAboutBranchesInRepository GithubBadRequestException, clientResponse: {}", clientErrorResponse);
-                        return Mono.error(new GithubBadRequestException(String.format("GithubBadRequestException, clientResponse: %s", clientErrorResponse)));
+                        return clientErrorResponse
+                                .bodyToMono(GithubErrorMessage.class)
+                                .flatMap(errorMessage -> {
+                                    String errorDescription = String.format("GithubBadRequestException, clientResponse: %s", errorMessage.message());
+                                    return Mono.error(new GithubBadRequestException(errorDescription));
+                                });
                     }
                 })
                 .onStatus(HttpStatusCode::isError, clientErrorResponse -> {
-                    log.error("GithubWebClient::getInformationAboutBranchesInRepository GithubApi exception, clientResponse: {}", clientErrorResponse);
-                    return Mono.error(new UnknownGithubApiException(String.format("Unknown GithubApi exception, clientResponse: %s", clientErrorResponse)));
+                    log.error("GithubWebClient::getUserRepositories GithubApi exception, clientResponse: {}", clientErrorResponse);
+                    return clientErrorResponse
+                            .bodyToMono(GithubErrorMessage.class)
+                            .flatMap(errorMessage -> {
+                                String errorDescription = String.format("GithubBadRequestException, clientResponse: %s", errorMessage.message());
+                                return Mono.error(new UnknownGithubApiException(String.format("Unknown GithubApi exception, clientResponse: %s", errorDescription)));
+                            });
                 })
                 .bodyToFlux(GithubApiBranchResponseRecord.class);
     }
