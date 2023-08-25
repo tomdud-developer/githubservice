@@ -17,9 +17,9 @@ Return information about user repositories with branches names and last commits 
   GET api/v1/github/repositories/{username}
 ```
 
-| Parameter | Type     | Description                       |
-| :-------- | :------- | :-------------------------------- |
-| `username`      | `string` | **Required**. GitHub username |
+| Parameter  | Type     | Description                   |
+|:-----------|:---------|:------------------------------|
+| `username` | `string` | **Required**. GitHub username |
 
 
 
