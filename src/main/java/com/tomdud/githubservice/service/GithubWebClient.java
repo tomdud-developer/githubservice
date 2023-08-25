@@ -15,7 +15,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpStatusCode;
 
 @Service
-
 public class GithubWebClient {
 
     private final WebClient webClient;
