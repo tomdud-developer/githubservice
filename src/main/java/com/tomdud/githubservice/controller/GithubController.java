@@ -28,7 +28,7 @@ public class GithubController {
     private final GithubService githubService;
 
     @Operation(
-            description = "Retrieve information about user repositories with branch name and last commit SHA, throw 404 if user not found on github",
+            description = "Retrieve information about user repositories with branches names and last commits SHA, throw 404 if user not found on github",
             summary = "User repositories"
     )
     @GetMapping(
