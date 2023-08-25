@@ -3,6 +3,7 @@ package com.tomdud.githubservice.service;
 import com.tomdud.githubservice.dto.RepositoryResponseDTO;
 import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseRecord;
 import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseRecord;
+import com.tomdud.githubservice.exception.GithubUserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,6 +126,11 @@ class GithubServiceTest {
                 .expectNext(repositoryResponseDTO1)
                 .expectNext(repositoryResponseDTO3)
                 .verifyComplete();
+    }
+
+    void testGetUserNotForkedRepositoriesInformationThrowUserNotFoundException() {
+        //when
+        when(githubWebClient.getUserRepositories(TEST_USERNAME + "_not_exist")).thenThrow(new GithubUserNotFoundException("User with name"));
     }
 
 

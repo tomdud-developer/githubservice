@@ -26,6 +26,8 @@ public class GithubService {
         log.info("GithubService::getUserNotForkedRepositoriesInformation for username {}", username);
 
         Flux<GithubApiRepositoriesResponseRecord> repositoriesFlux = githubWebClient.getUserRepositories(username);
+
+
         return repositoriesFlux
                 .filter(Predicate.not(GithubApiRepositoriesResponseRecord::fork))
                 .flatMapSequential(repository -> {

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseRecord;
 import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseRecord;
+import com.tomdud.githubservice.exception.GithubResourceNotFoundException;
 import com.tomdud.githubservice.exception.GithubUserNotFoundException;
+import com.tomdud.githubservice.exception.UnknownGithubApiException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -91,6 +93,21 @@ class GithubWebClientTest {
     }
 
     @Test
+    void testGetUserRepositoriesFailedBecauseOfGithubExternalError() {
+        //when
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(500)
+        );
+        Flux<GithubApiRepositoriesResponseRecord> githubApiRepositoriesResponseDTOFlux =
+                githubWebClient.getUserRepositories("test-username");
+
+        //then
+        StepVerifier.create(githubApiRepositoriesResponseDTOFlux)
+                .expectError(UnknownGithubApiException.class)
+                .verify();
+    }
+
+    @Test
     void testGetInformationAboutBranchesInRepositorySuccess() throws JsonProcessingException {
         //given
         List<GithubApiBranchResponseRecord> mockBranchesDTOList = new ArrayList<>();
@@ -119,7 +136,7 @@ class GithubWebClientTest {
     }
 
     @Test
-    void testGetInformationAboutBranchesInRepositorySuccessBecauseOfNotExistingUserOrRepository() throws JsonProcessingException {
+    void testGetInformationAboutBranchesInRepositoryFailedBecauseOfNotExistingUserOrRepository() throws JsonProcessingException {
         //when
         mockBackEnd.enqueue(new MockResponse()
                 .setResponseCode(404)
@@ -129,7 +146,22 @@ class GithubWebClientTest {
 
         //then
         StepVerifier.create(githubApiRepositoriesResponseDTOFlux)
-                .expectError(GithubUserNotFoundException.class)
+                .expectError(GithubResourceNotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void testGetInformationAboutBranchesInRepositoryFailedBecauseOfGithubServerError() throws JsonProcessingException {
+        //when
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(500)
+        );
+        Flux<GithubApiBranchResponseRecord> githubApiRepositoriesResponseDTOFlux =
+                githubWebClient.getInformationAboutBranchesInRepository("test-username", "test-repository-name");
+
+        //then
+        StepVerifier.create(githubApiRepositoriesResponseDTOFlux)
+                .expectError(UnknownGithubApiException.class)
                 .verify();
     }
 

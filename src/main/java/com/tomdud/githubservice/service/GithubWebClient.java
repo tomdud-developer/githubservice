@@ -2,11 +2,14 @@ package com.tomdud.githubservice.service;
 
 import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseRecord;
 import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseRecord;
+import com.tomdud.githubservice.exception.GithubResourceNotFoundException;
+import com.tomdud.githubservice.exception.UnknownGithubApiException;
 import com.tomdud.githubservice.exception.GithubUserNotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -40,12 +43,18 @@ public class GithubWebClient {
                 .uri(usersResourceUri)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> {
-                    log.error("GithubWebClient::getUserRepositories Username with name {} not found on GitHub", username);
-                    return Mono.error(new GithubUserNotFoundException(String.format("Username with name %s not found on GitHub", username)));
+                .onStatus(HttpStatusCode::is4xxClientError, clientErrorResponse -> {
+                    if (clientErrorResponse.statusCode().equals(HttpStatus.NOT_FOUND)) {
+                        log.error("GithubWebClient::getUserRepositories Username with name {} not found on GitHub", username);
+                        return Mono.error(new GithubUserNotFoundException(String.format("Username with name %s not found on GitHub", username)));
+                    } else {
+                        log.error("GithubWebClient::getUserRepositories GithubApi exception, clientResponse: {}", clientErrorResponse);
+                        return Mono.error(new UnknownGithubApiException(String.format("Unknown GithubApi exception, clientResponse: %s", clientErrorResponse)));
+                    }
                 })
-                .onStatus(HttpStatusCode::isError, clientResponse -> {
-                    return clientResponse.createException();
+                .onStatus(HttpStatusCode::isError, clientErrorResponse -> {
+                    log.error("GithubWebClient::getUserRepositories GithubApi exception, clientResponse: {}", clientErrorResponse);
+                    return Mono.error(new UnknownGithubApiException(String.format("Unknown GithubApi exception, clientResponse: %s", clientErrorResponse)));
                 })
                 .bodyToFlux(GithubApiRepositoriesResponseRecord.class);
     }
@@ -62,12 +71,24 @@ public class GithubWebClient {
                 .uri(reposResourceUri)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> {
-                    log.error(
-                            "GithubWebClient::getInformationAboutBranchesInRepository Username with name {} or repository with name {} not found on GitHub",
-                            username, repositoryName
-                    );
-                    return Mono.error(new GithubUserNotFoundException(String.format("Username with name %s not found on GitHub", username)));
+                .onStatus(HttpStatusCode::is4xxClientError, clientErrorResponse -> {
+                    if (clientErrorResponse.statusCode().equals(HttpStatus.NOT_FOUND)) {
+                        log.error(
+                                "GithubWebClient::getInformationAboutBranchesInRepository Username {} or repository {} not found on GitHub",
+                                username, repositoryName
+                        );
+                        return Mono.error(
+                                new GithubResourceNotFoundException(
+                                        String.format("Username %s or repository %s not found on GitHub", username, repositoryName))
+                        );
+                    } else {
+                        log.error("GithubWebClient::getInformationAboutBranchesInRepository GithubApi exception, clientResponse: {}", clientErrorResponse);
+                        return Mono.error(new UnknownGithubApiException(String.format("Unknown GithubApi exception, clientResponse: %s", clientErrorResponse)));
+                    }
+                })
+                .onStatus(HttpStatusCode::isError, clientErrorResponse -> {
+                    log.error("GithubWebClient::getInformationAboutBranchesInRepository GithubApi exception, clientResponse: {}", clientErrorResponse);
+                    return Mono.error(new UnknownGithubApiException(String.format("Unknown GithubApi exception, clientResponse: %s", clientErrorResponse)));
                 })
                 .bodyToFlux(GithubApiBranchResponseRecord.class);
     }
