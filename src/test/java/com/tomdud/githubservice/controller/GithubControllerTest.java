@@ -33,7 +33,7 @@ class GithubControllerTest {
     @MockBean
     GithubService githubService;
 
-    private final String CONTROLLER_BASE_URL = "/github/repositories";
+    private final String CONTROLLER_BASE_URL = "api/v1/github/repositories";
     private final String TEST_USERNAME = "test-username";
 
     //Declaring mocked responses

@@ -1,21 +1,21 @@
 package com.tomdud.githubservice.service;
 
-import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseRecord;
 import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseRecord;
+import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseRecord;
 import com.tomdud.githubservice.exception.GithubBadRequestException;
 import com.tomdud.githubservice.exception.GithubResourceNotFoundException;
-import com.tomdud.githubservice.exception.UnknownGithubApiException;
 import com.tomdud.githubservice.exception.GithubUserNotFoundException;
+import com.tomdud.githubservice.exception.UnknownGithubApiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import org.springframework.http.HttpStatusCode;
 
 @Service
 public class GithubWebClient {
