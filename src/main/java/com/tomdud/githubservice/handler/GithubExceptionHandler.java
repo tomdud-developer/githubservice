@@ -56,7 +56,7 @@ public class GithubExceptionHandler {
 
         ErrorDTO errorDTO = new ErrorDTO(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDTO);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDTO);
     }
 
     @ResponseBody

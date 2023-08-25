@@ -3,7 +3,10 @@ package com.tomdud.githubservice.controller;
 import com.tomdud.githubservice.dto.RepositoryResponseDTO;
 import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseRecord;
 import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseRecord;
+import com.tomdud.githubservice.exception.GithubBadRequestException;
+import com.tomdud.githubservice.exception.GithubResourceNotFoundException;
 import com.tomdud.githubservice.exception.GithubUserNotFoundException;
+import com.tomdud.githubservice.exception.UnknownGithubApiException;
 import com.tomdud.githubservice.service.GithubService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -132,6 +135,75 @@ class GithubControllerTest {
     }
 
     @Test
+    void testGetUserNotForkedRepositoriesInformationErrorBecauseRepositoryNotFound() {
+        //when
+        when(githubService.getUserNotForkedRepositoriesInformation(TEST_USERNAME)).thenReturn(Flux.error(new GithubResourceNotFoundException("User or Repo not found")));
+
+        //then
+        webTestClient
+                .get()
+                .uri(CONTROLLER_BASE_URL + "/" + TEST_USERNAME)
+                .header(HttpHeaders.ACCEPT, APPLICATION_JSON_VALUE)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(404)
+                .jsonPath("$.message").isEqualTo("User or Repo not found");
+    }
+
+    @Test
+    void testGetUserNotForkedRepositoriesInformationErrorBecauseGithubApiNotRecognizedError() {
+        //when
+        when(githubService.getUserNotForkedRepositoriesInformation(TEST_USERNAME)).thenReturn(Flux.error(new UnknownGithubApiException("GithubApiError")));
+
+        //then
+        webTestClient
+                .get()
+                .uri(CONTROLLER_BASE_URL + "/" + TEST_USERNAME)
+                .header(HttpHeaders.ACCEPT, APPLICATION_JSON_VALUE)
+                .exchange()
+                .expectStatus().is5xxServerError()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(500)
+                .jsonPath("$.message").isEqualTo("GithubApiError");
+    }
+
+    @Test
+    void testGetUserNotForkedRepositoriesInformationErrorBecauseGithubBadRequestExceptionForExampleRequestLimit() {
+        //when
+        when(githubService.getUserNotForkedRepositoriesInformation(TEST_USERNAME)).thenReturn(Flux.error(new GithubBadRequestException("GithubApi request limit")));
+
+        //then
+        webTestClient
+                .get()
+                .uri(CONTROLLER_BASE_URL + "/" + TEST_USERNAME)
+                .header(HttpHeaders.ACCEPT, APPLICATION_JSON_VALUE)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(400)
+                .jsonPath("$.message").isEqualTo("GithubApi request limit");
+    }
+
+    @Test
+    void testGetUserNotForkedRepositoriesInformationErrorBecauseGithubAnyOtherRuntimeException() {
+        //when
+        when(githubService.getUserNotForkedRepositoriesInformation(TEST_USERNAME)).thenReturn(Flux.error(new RuntimeException("Other")));
+
+        //then
+        webTestClient
+                .get()
+                .uri(CONTROLLER_BASE_URL + "/" + TEST_USERNAME)
+                .header(HttpHeaders.ACCEPT, APPLICATION_JSON_VALUE)
+                .exchange()
+                .expectStatus().is5xxServerError()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(500)
+                .jsonPath("$.message").isEqualTo("Other");
+    }
+
+
+    @Test
     void testGetUserNotForkedRepositoriesInformationErrorBecauseOfBadAcceptHeader() {
         //then
         webTestClient
@@ -144,6 +216,8 @@ class GithubControllerTest {
                 .jsonPath("$.status").isEqualTo(406)
                 .jsonPath("$.message").isEqualTo("You provided wrong Accept header, there is a acceptable MIME type:" + MediaType.APPLICATION_JSON_VALUE);
     }
+
+
 
 
 
