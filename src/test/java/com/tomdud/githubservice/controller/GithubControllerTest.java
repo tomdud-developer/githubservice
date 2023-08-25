@@ -11,11 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import java.util.stream.Stream;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -88,7 +91,7 @@ class GithubControllerTest {
         webTestClient
                 .get()
                 .uri(CONTROLLER_BASE_URL + "/" + TEST_USERNAME)
-                .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .header(HttpHeaders.ACCEPT, APPLICATION_JSON_VALUE)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -120,13 +123,29 @@ class GithubControllerTest {
         webTestClient
                 .get()
                 .uri(CONTROLLER_BASE_URL + "/" + TEST_USERNAME)
-                .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .header(HttpHeaders.ACCEPT, APPLICATION_JSON_VALUE)
                 .exchange()
                 .expectStatus().is4xxClientError()
                 .expectBody()
                 .jsonPath("$.status").isEqualTo(404)
                 .jsonPath("$.message").isEqualTo("User not found");
     }
+
+    @Test
+    void testGetUserNotForkedRepositoriesInformationErrorBecauseOfBadAcceptHeader() {
+        //then
+        webTestClient
+                .get()
+                .uri(CONTROLLER_BASE_URL + "/" + TEST_USERNAME)
+                .header(HttpHeaders.ACCEPT, APPLICATION_XML_VALUE)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatusCode.valueOf(406))
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(406)
+                .jsonPath("$.message").isEqualTo("You provided wrong Accept header, there is a acceptable MIME type:" + MediaType.APPLICATION_JSON_VALUE);
+    }
+
+
 
 
 
