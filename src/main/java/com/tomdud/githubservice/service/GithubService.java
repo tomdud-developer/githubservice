@@ -24,7 +24,7 @@ public class GithubService {
         this.githubWebClient = githubWebClient;
     }
 
-    public Flux<RepositoryResponseDTO> getUserNotForkedRepositoriesInformation (String username) {
+    public Flux<RepositoryResponseDTO> getUserNotForkedRepositoriesInformation(String username) {
         log.info("GithubService::getUserNotForkedRepositoriesInformation for username {}", username);
 
         Flux<GithubApiRepositoriesResponseRecord> repositoriesFlux = githubWebClient.getUserRepositories(username);
@@ -41,7 +41,7 @@ public class GithubService {
 
         return githubApiBranchResponseDTOFlux.collectList().map(
                 branches -> RepositoryResponseDTO.builder()
-                        .name(githubApiRepositoriesResponseRecord.name())
+                        .repositoryName(githubApiRepositoriesResponseRecord.name())
                         .ownerLogin(username)
                         .branches(generateBranchList(branches))
                         .build()
@@ -60,7 +60,7 @@ public class GithubService {
                 RepositoryResponseDTO.Branch
                         .builder()
                         .name(branch.name())
-                        .sha(branch.commit().sha())
+                        .lastCommitSha(branch.commit().sha())
                         .build()
         ).toList();
     }

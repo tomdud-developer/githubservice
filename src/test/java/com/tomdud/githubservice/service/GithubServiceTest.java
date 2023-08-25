@@ -23,7 +23,7 @@ class GithubServiceTest {
     @MockBean
     private GithubWebClient githubWebClient;
 
-    private final String TEST_USERNAME = "test-username";;
+    private final String TEST_USERNAME = "test-username";
 
     //Declaring mocked responses
     private GithubApiRepositoriesResponseRecord githubApiRepositoriesResponseMocked1;
@@ -76,13 +76,13 @@ class GithubServiceTest {
 
         repositoryResponseDTO1 = RepositoryResponseDTO
                 .builder()
-                .name(githubApiRepositoriesResponseMocked1.name())
+                .repositoryName(githubApiRepositoriesResponseMocked1.name())
                 .ownerLogin(TEST_USERNAME)
                 .branches(
                         Stream.of(githubApiBranchResponseFluxMocked1_1, githubApiBranchResponseFluxMocked1_2)
                                 .map(branchResponse -> RepositoryResponseDTO.Branch.builder()
                                         .name(branchResponse.name())
-                                        .sha(branchResponse.commit().sha())
+                                        .lastCommitSha(branchResponse.commit().sha())
                                         .build())
                                 .toList()
                 )
@@ -90,13 +90,13 @@ class GithubServiceTest {
 
         repositoryResponseDTO3 = RepositoryResponseDTO
                 .builder()
-                .name(githubApiRepositoriesResponseMocked3.name())
+                .repositoryName(githubApiRepositoriesResponseMocked3.name())
                 .ownerLogin(TEST_USERNAME)
                 .branches(
                         Stream.of(githubApiBranchResponseFluxMocked3_1)
                                 .map(branchResponse -> RepositoryResponseDTO.Branch.builder()
                                         .name(branchResponse.name())
-                                        .sha(branchResponse.commit().sha())
+                                        .lastCommitSha(branchResponse.commit().sha())
                                         .build())
                                 .toList()
                 )

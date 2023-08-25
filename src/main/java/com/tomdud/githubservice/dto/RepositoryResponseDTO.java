@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 public class RepositoryResponseDTO {
 
-    private String name;
+    private String repositoryName;
     private String ownerLogin;
     private List<Branch> branches;
 
@@ -17,7 +17,7 @@ public class RepositoryResponseDTO {
     @Builder
     public static class Branch {
         private String name;
-        private String sha;
+        private String lastCommitSha;
 
         @Override
         public boolean equals(Object o) {
@@ -27,13 +27,13 @@ public class RepositoryResponseDTO {
             Branch branch = (Branch) o;
 
             if (!name.equals(branch.name)) return false;
-            return sha.equals(branch.sha);
+            return lastCommitSha.equals(branch.lastCommitSha);
         }
 
         @Override
         public int hashCode() {
             int result = name.hashCode();
-            result = 31 * result + sha.hashCode();
+            result = 31 * result + lastCommitSha.hashCode();
             return result;
         }
     }
@@ -45,14 +45,14 @@ public class RepositoryResponseDTO {
 
         RepositoryResponseDTO that = (RepositoryResponseDTO) o;
 
-        if (!name.equals(that.name)) return false;
+        if (!repositoryName.equals(that.repositoryName)) return false;
         if (!ownerLogin.equals(that.ownerLogin)) return false;
         return branches.equals(that.branches);
     }
 
     @Override
     public int hashCode() {
-        int result = name.hashCode();
+        int result = repositoryName.hashCode();
         result = 31 * result + ownerLogin.hashCode();
         result = 31 * result + branches.hashCode();
         return result;
