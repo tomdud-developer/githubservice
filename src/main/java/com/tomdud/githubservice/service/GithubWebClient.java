@@ -27,12 +27,21 @@ public class GithubWebClient {
     public GithubWebClient (
             WebClient.Builder webClientBuilder,
             @Value("${webclient.api.github.url}") String url,
-            @Value("${webclient.api.github.version}") String version
+            @Value("${webclient.api.github.version}") String version,
+            @Value("personal-github-token") String personalGithubToken
     ) {
-        this.webClient = webClientBuilder
-                .baseUrl(url)
-                .defaultHeader("X-GitHub-Api-Version", version)
-                .build();
+        if (personalGithubToken != null) {
+            this.webClient = webClientBuilder
+                    .baseUrl(url)
+                    .defaultHeader("Authorization", personalGithubToken)
+                    .defaultHeader("X-GitHub-Api-Version", version)
+                    .build();
+        } else {
+            this.webClient = webClientBuilder
+                    .baseUrl(url)
+                    .defaultHeader("X-GitHub-Api-Version", version)
+                    .build();
+        }
     }
 
     Flux<GithubApiRepositoriesResponseRecord> getUserRepositories(String username) {
@@ -50,7 +59,7 @@ public class GithubWebClient {
                         return Mono.error(new GithubUserNotFoundException(String.format("Username with name %s not found on GitHub", username)));
                     } else {
                         log.error("GithubWebClient::getUserRepositories GithubApi exception, clientResponse: {}", clientErrorResponse);
-                        return Mono.error(new GithubBadRequestException(String.format("GithubBadRequestException, clientResponse: %s", clientErrorResponse)));
+                        return Mono.error(new GithubBadRequestException(String.format("GithubBadRequestException, clientResponse: %s", clientErrorResponse.bodyToMono(String.class))));
                     }
                 })
                 .onStatus(HttpStatusCode::isError, clientErrorResponse -> {

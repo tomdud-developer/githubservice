@@ -50,7 +50,8 @@ class GithubWebClientTest {
         githubWebClient = new GithubWebClient(
                 WebClient.builder(),
                 mockBackEnd.url("/").toString(),
-                "test-version");
+                "test-version",
+                null);
     }
 
     @Test
