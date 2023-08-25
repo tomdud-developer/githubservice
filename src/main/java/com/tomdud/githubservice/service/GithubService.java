@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-import java.util.stream.Collectors;
-
 @Service
 public class GithubService {
 
@@ -38,7 +36,7 @@ public class GithubService {
                                                                 .name(branch.name())
                                                                 .sha(branch.commit().sha())
                                                                 .build()
-                                            ).collect(Collectors.toList())
+                                            ).toList()
                                     ).build()
                     );
                 }

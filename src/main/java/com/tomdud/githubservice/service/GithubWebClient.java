@@ -45,6 +45,9 @@ public class GithubWebClient {
                     log.error("GithubWebClient::getUserRepositories Username with name {} not found on GitHub", username);
                     return Mono.error(new GithubUserNotFoundException(String.format("Username with name %s not found on GitHub", username)));
                 })
+                .onStatus(HttpStatusCode::isError, clientResponse -> {
+                    return clientResponse.createException();
+                })
                 .bodyToFlux(GithubApiRepositoriesResponseRecord.class);
     }
 
