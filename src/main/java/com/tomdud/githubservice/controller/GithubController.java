@@ -27,10 +27,7 @@ public class GithubController {
     private final Logger log = LoggerFactory.getLogger(GithubController.class);
     private final GithubService githubService;
 
-    @Operation(
-            description = "Retrieve information about user repositories with branches names and last commits SHA, throw 404 if user not found on github",
-            summary = "User repositories"
-    )
+
     @GetMapping(
             value = "/{username}",
             produces = MediaType.APPLICATION_JSON_VALUE
@@ -40,7 +37,7 @@ public class GithubController {
 
         return githubService.getUserNotForkedRepositoriesInformation(username)
                 .collectList()
-                .map(response -> ApiResponse.<List<RepositoryResponseDTO>>builder()
+                .map(response -> ApiResponse.<List<RepositoryResponseDTO>>builder() //wywalic to do serwicer
                         .status("success")
                         .results(response)
                         .build()
