@@ -35,12 +35,14 @@ public class GithubWebClient {
                     .baseUrl(url)
                     .defaultHeader("Authorization", personalGithubToken)
                     .defaultHeader("X-GitHub-Api-Version", version)
+                    .defaultHeader("Accept", "application/vnd.github+json")
                     .build();
         } else {
             log.info("GithubWebClient::constructor running without token mode");
             this.webClient = webClientBuilder
                     .baseUrl(url)
                     .defaultHeader("X-GitHub-Api-Version", version)
+                    .defaultHeader("Accept", "application/vnd.github+json")
                     .build();
         }
     }
