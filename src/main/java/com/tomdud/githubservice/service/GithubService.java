@@ -1,5 +1,7 @@
 package com.tomdud.githubservice.service;
 
+import com.tomdud.githubservice.dto.BranchDTO;
+import com.tomdud.githubservice.dto.RepositoryDTO;
 import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseRecord;
 import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseRecord;
 import com.tomdud.githubservice.exception.GithubBadRequestException;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.function.Predicate;
 
 @Service
 public class GithubService {
@@ -38,7 +42,7 @@ public class GithubService {
     }
 
 
-    public Flux<GithubApiRepositoriesResponseRecord> getUserRepositories(String username) {
+    public Flux<RepositoryDTO> getUserRepositories(String username) {
         String usersResourceUri = String.format("/users/%s/repos", username);
 
         log.info("GithubWebClient::getUserRepositories for username {} - send request to GitHub API {}", username, usersResourceUri);
@@ -60,11 +64,20 @@ public class GithubService {
                     log.error("GithubWebClient::getUserRepositories GithubApi exception, status code from Github - {}", clientErrorResponse.statusCode().value());
                     return Mono.error(new UnknownGithubApiException(String.format("Unknown GithubApi exception, status code from Github - %d", clientErrorResponse.statusCode().value())));
                 })
-                .bodyToFlux(GithubApiRepositoriesResponseRecord.class);
+                .bodyToFlux(RepositoryDTO.class)
+                .filter(Predicate.not(RepositoryDTO::isFork))
+                .flatMap(repository -> {
+                    Flux<BranchDTO> branchInfo = getInformationAboutBranchesInRepository(username, repository.getRepositoryName());
+                    return branchInfo.collectList().map(branchesList -> {
+                        repository.setBranches(branchesList);
+                        return repository;
+                    });
+                });
+
     }
 
 
-    private Flux<GithubApiBranchResponseRecord> getInformationAboutBranchesInRepository(String username, String repositoryName) {
+    private Flux<BranchDTO> getInformationAboutBranchesInRepository(String username, String repositoryName) {
         String reposResourceUri = String.format("/repos/%s/%s/branches", username, repositoryName);
 
         log.info(
@@ -95,7 +108,7 @@ public class GithubService {
                     log.error("GithubWebClient::getInformationAboutBranchesInRepository GithubApi exception, status code from Github - {}", clientErrorResponse.statusCode().value());
                     return Mono.error(new UnknownGithubApiException(String.format("Unknown GithubApi exception, status code from Github - %d", clientErrorResponse.statusCode().value())));
                 })
-                .bodyToFlux(GithubApiBranchResponseRecord.class);
+                .bodyToFlux(BranchDTO.class);
     }
 
     /*

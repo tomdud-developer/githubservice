@@ -1,6 +1,5 @@
 package com.tomdud.githubservice.service;
 
-import com.tomdud.githubservice.dto.RepositoryResponseDTO;
 import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseRecord;
 import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseRecord;
 import com.tomdud.githubservice.exception.GithubUserNotFoundException;
