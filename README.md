@@ -3,10 +3,10 @@
 
 Service to retrieve information about not forked user repositories with branches names and last commits SHA
 
+**Java 17 + Spring Boot 3**
 # Link to app
 ### I deployed app on AWS EC2
 http://54.171.216.37:8080/swagger-ui/index.html
-
 
 or try http://54.171.216.37:8080/api/v1/github/repositories/tomdud-developer
 ## Swagger UI
