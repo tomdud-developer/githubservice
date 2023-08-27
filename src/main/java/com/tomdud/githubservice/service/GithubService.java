@@ -2,8 +2,6 @@ package com.tomdud.githubservice.service;
 
 import com.tomdud.githubservice.dto.BranchDTO;
 import com.tomdud.githubservice.dto.RepositoryDTO;
-import com.tomdud.githubservice.dto.githubapi.GithubApiBranchResponseRecord;
-import com.tomdud.githubservice.dto.githubapi.GithubApiRepositoriesResponseRecord;
 import com.tomdud.githubservice.exception.GithubBadRequestException;
 import com.tomdud.githubservice.exception.GithubResourceNotFoundException;
 import com.tomdud.githubservice.exception.GithubUserNotFoundException;
@@ -33,9 +31,13 @@ public class GithubService {
     @Value("${webclient.api.github.version}")
     private  String version;
 
+    @Value("${token}")
+    private  String token;
+
     public GithubService() {
         this.webClient = WebClient.builder()
-                .baseUrl(url)
+                .baseUrl("https://api.github.com")
+                .defaultHeader("Authorization", "")
                 .defaultHeader("X-GitHub-Api-Version", version)
                 .defaultHeader("Accept", "application/vnd.github+json")
                 .build();
@@ -72,7 +74,7 @@ public class GithubService {
                         repository.setBranches(branchesList);
                         return repository;
                     });
-                });
+                }).log();
 
     }
 

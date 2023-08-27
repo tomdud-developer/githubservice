@@ -1,8 +1,12 @@
 package com.tomdud.githubservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 import java.util.List;
 
 public class RepositoryDTO {
+
+    @JsonAlias({"name"})
     private String repositoryName;
     private boolean fork;
     private List<BranchDTO> branches;
