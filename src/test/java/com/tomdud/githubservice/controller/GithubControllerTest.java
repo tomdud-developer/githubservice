@@ -15,7 +15,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
+
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
 
@@ -36,7 +36,7 @@ class GithubControllerTest {
         wireMockServer = new WireMockServer(8081);
         wireMockServer.start();
 
-        configureFor("localhost", wireMockServer.port());
+        WireMock.configureFor("localhost", wireMockServer.port());
 
         WireMock.stubFor(WireMock.get(WireMock.urlPathEqualTo("/users/" + TEST_USERNAME + "/repos"))
                 .willReturn(WireMock.aResponse()
@@ -93,7 +93,7 @@ class GithubControllerTest {
                 .expectStatus().is4xxClientError()
                 .expectBody()
                 .jsonPath("$.status").isEqualTo(404)
-                .jsonPath("$.message").isEqualTo("Username with name test-username_NOT_EXIST not found on GitHub");
+                .jsonPath("$.message").isEqualTo("Username with name " + TEST_USERNAME + "_NOT_EXIST" +  " not found on GitHub");
     }
 
     @Test

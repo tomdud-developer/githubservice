@@ -3,5 +3,3 @@ webclient:
     github:
       url: http://localhost:8081
       version: 2022-11-28
-
-token: test-token

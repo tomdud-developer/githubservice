@@ -10,17 +10,16 @@ public class RepositoryDTO {
 
     @JsonAlias({"name"})
     private String repositoryName;
+
     private String repositoryOwner;
+
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private boolean fork;
+
     private List<BranchDTO> branches;
 
     public void setRepositoryName(String repositoryName) {
         this.repositoryName = repositoryName;
-    }
-
-    public void setRepositoryOwner(String repositoryOwner) {
-        this.repositoryOwner = repositoryOwner;
     }
 
     @JsonProperty("owner")

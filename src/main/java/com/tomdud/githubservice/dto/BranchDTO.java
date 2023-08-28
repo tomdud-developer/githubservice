@@ -13,10 +13,6 @@ public class BranchDTO {
         this.name = name;
     }
 
-    public void setLastCommitSha(String lastCommitSha) {
-        this.lastCommitSha = lastCommitSha;
-    }
-
     @JsonProperty("commit")
     private void unpackNestedCommit(Map<String,Object> commit) {
         this.lastCommitSha = (String)commit.get("sha");

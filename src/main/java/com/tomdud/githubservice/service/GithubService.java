@@ -26,11 +26,11 @@ public class GithubService {
     private final WebClient webClient;
 
     public GithubService(
-            @Value("${token}") String token,
+            @Value("${token:}") String token,
             @Value("${webclient.api.github.url}") String url,
             @Value("${webclient.api.github.version}") String version
     ) {
-        if (token != null) {
+        if (!token.isEmpty()) {
             log.info("GithubService::Constructor token mode enabled");
             this.webClient = WebClient.builder()
                     .baseUrl(url)

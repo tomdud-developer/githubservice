@@ -6,5 +6,3 @@ webclient:
     github:
       url: https://api.github.com
       version: 2022-11-28
-
-token: test-token
