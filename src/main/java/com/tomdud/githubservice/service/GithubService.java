@@ -71,9 +71,7 @@ public class GithubService {
                     return Mono.error(new UnknownGithubApiException(String.format("Unknown GithubApi exception, status code from Github - %d", clientErrorResponse.statusCode().value())));
                 })
                 .bodyToFlux(RepositoryDTO.class)
-                .filter(x -> {System.out.println("XXX: " + x.isFork()); return true;})
                 .filter(Predicate.not(RepositoryDTO::isFork))
-                .take(3) //TODO
                 .flatMap(repository -> {
                     Flux<BranchDTO> branchInfo = getInformationAboutBranchesInRepository(username, repository.getRepositoryName());
                     return branchInfo.collectList().map(branchesList -> {
