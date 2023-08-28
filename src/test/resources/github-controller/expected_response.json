@@ -1,0 +1,24 @@
+[
+  {
+    "repositoryName": "AstrometryDataCompressionProject",
+    "repositoryOwner": "tomdud-developer",
+    "branches": [
+      {
+        "name": "RowsColumnsChanger",
+        "lastCommitSha": "44e6d0740fa4d771331cca72c18b5ec2bfe9c181"
+      },
+      {
+        "name": "exportData",
+        "lastCommitSha": "be660f2996adb40ea255d6f64a75b9af54e0bd51"
+      },
+      {
+        "name": "mainDev",
+        "lastCommitSha": "9fd2bef6006f6cf1959894841244313ebe8c169a"
+      },
+      {
+        "name": "master",
+        "lastCommitSha": "0333421b4bca211050b5cc3ec5b226ba0fd965d6"
+      }
+    ]
+  }
+]

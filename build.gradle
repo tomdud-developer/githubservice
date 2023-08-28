@@ -24,16 +24,18 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    testImplementation "com.github.tomakehurst:wiremock-jre8-standalone:2.35.0"
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
     testImplementation("com.squareup.okhttp3:mockwebserver:4.11.0")
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:2.1.0'
-    testImplementation "com.github.tomakehurst:wiremock-jre8:2.35.0"
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+test {
+    systemProperty 'spring.profiles.active', 'test'
 }
