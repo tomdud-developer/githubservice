@@ -71,6 +71,7 @@ class GithubControllerTest {
             throw new RuntimeException("Problem with loading expected json response file");
         }
 
+        //then
         webTestClient
                 .get()
                 .uri(CONTROLLER_BASE_URL + "/{username}", TEST_USERNAME)

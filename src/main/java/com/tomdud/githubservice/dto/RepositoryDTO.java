@@ -12,7 +12,6 @@ public class RepositoryDTO {
     @JsonAlias({"name"})
     private String repositoryName;
     private String repositoryOwner;
-
     private boolean fork;
     private List<BranchDTO> branches;
 
@@ -25,11 +24,10 @@ public class RepositoryDTO {
     }
 
     @JsonProperty("owner")
-    private void unpackNestedCommit(Map<String,Object> owner) {
+    private void unpackNestedOwner(Map<String,Object> owner) {
         this.repositoryOwner = (String)owner.get("login");
     }
 
-    //@JsonIgnore
     public void setFork(boolean fork) {
         this.fork = fork;
     }
