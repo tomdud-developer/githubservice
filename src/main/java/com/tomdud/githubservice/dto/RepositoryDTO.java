@@ -1,7 +1,6 @@
 package com.tomdud.githubservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
@@ -12,6 +11,7 @@ public class RepositoryDTO {
     @JsonAlias({"name"})
     private String repositoryName;
     private String repositoryOwner;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private boolean fork;
     private List<BranchDTO> branches;
 
